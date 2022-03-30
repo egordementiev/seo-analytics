@@ -1,0 +1,33 @@
+{% extends "AB_tests/base_ab_test.html" %}
+{% block content %}
+<div class="card" style="width: 100%">
+  <div class="card-body">
+    <h2 class="text-center">Create A/B Test</h2>
+    <div class="grafic d-flex justify-content-center">
+      <img src="https://ru-static.z-dn.net/files/d9b/4929deb610861bc06cf74b49ede99d80.png" style="width: 95%">
+    </div>
+    <form>
+      <div class="form-group">
+        <label for="exampleInputEmail1">Title of test</label>
+        <input type="text" class="form-control" id="groupAstart">
+        <small class="form-text text-muted">Max length is 32 chars</small>
+      </div>
+      <div class="form-group">
+        <label for="exampleInputEmail1">Desciption of test</label>
+        <input type="text" class="form-control" id="groupAstart">
+      </div>
+      <div class="form-group">
+        <label for="exampleInputEmail1">group A start</label>
+        <input type="date" class="form-control" id="groupAstart">
+        <small class="form-text text-muted">The sample will be taken within 28 days after the start date</small>
+      </div>
+      <div class="form-group">
+        <label for="exampleInputEmail1">group B start</label>
+        <input type="date" class="form-control" id="groupBstart">
+        <small class="form-text text-muted">The sample will be taken within 28 days after the start date</small>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

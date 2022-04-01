@@ -2,30 +2,24 @@
 {% block content %}
 <div class="card" style="width: 100%">
   <div class="card-body">
-    <h2 class="text-center">Create A/B Test</h2>
+    <h2 class="text-center">Finish A/B Test</h2>
     <div class="grafic d-flex justify-content-center">
       <img src="https://ru-static.z-dn.net/files/d9b/4929deb610861bc06cf74b49ede99d80.png" style="width: 95%">
     </div>
-    <form>
-      <div class="form-group">
-        <label for="exampleInputEmail1">Title of test</label>
-        <input type="text" class="form-control" id="groupAstart">
+    <form method="post">
+      <div class="d-flex justify-content-center">
+        <div class="form-group">
+          <label for="exampleInputEmail1">Choose the test</label>
+          <select>
+            <option>Test 1</option>
+            <option>Test 2</option>
+            <option>Test 3</option>
+          </select>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="exampleInputEmail1">Desciption of test</label>
-        <input type="text" class="form-control" id="groupAstart">
+      <div class="d-flex justify-content-center">
+        <button type="Submit" class="btn btn-primary">Next</button>
       </div>
-      <div class="form-group">
-        <label for="exampleInputEmail1">group A start</label>
-        <input type="date" class="form-control" id="groupAstart">
-        <small class="form-text text-muted">The sample will be taken within 28 days after the start date</small>
-      </div>
-      <div class="form-group">
-        <label for="exampleInputEmail1">group B start</label>
-        <input type="date" class="form-control" id="groupBstart">
-        <small class="form-text text-muted">The sample will be taken within 28 days after the start date</small>
-      </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
     </form>
   </div>
 </div>

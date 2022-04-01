@@ -1,33 +1,26 @@
 from django.db import models
-
-
-class ABTest(models.Model):
-    ID = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=32)
-    description = models.TextField()
-    start_group_a_date = models.DateTimeField()
-    start_group_b_date = models.DateTimeField()
-    is_finished = models.BooleanField(default=False)
+from django.contrib.auth.models import User
 
 
 class Site(models.Model):
     ID = models.AutoField(primary_key=True)
-    url = models.CharField(max_length=32)
-    user = models.ForeignKey()
+    domain = models.CharField(max_length=128)
+    graphic = models.ImageField()
+    graphic_last_update = models.DateTimeField(auto_now_add=True)
 
 
-class Result(models.Model):
+class ABTest(models.Model):
     ID = models.AutoField(primary_key=True)
-    percent = models.FloatField()
-    mark = models.IntegerField()
+    title = models.CharField(max_length=128)
+    description = models.TextField()
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    start_group_a_date = models.DateTimeField()
+    start_group_b_date = models.DateTimeField()
+    is_finished = models.BooleanField(default=False)
+    result = models.FloatField(null=True)
 
 
-class User(models.Model):
+class SiteAdmins(models.Model):
     ID = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=32)
-    surname = models.CharField(max_length=64)
-    login = models.CharField(max_length=32)
-    password = models.CharField(max_length=128)
-
-
-# Create your models here.
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)

@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 import datetime
@@ -14,11 +16,10 @@ from oauth2client import tools
 import re
 import os
 from urllib.parse import urlparse
+from time import sleep
 
 site = 'https://hauswasserpumpe.info'  # Property to extract
-num_days = 365  # Number of Days, Months to Extract
-creds = 'client_secrets.json'  # Credential file from GSC
-output = 'gsc_data.csv'
+num_days = 365
 
 
 # Get Domain Name to Create a Project
@@ -116,80 +117,60 @@ def get_graphic_from_data(data):
 
 
 # Create function to extract all the data
-def extract_data(site, creds, num_days, output):
-    domain_name = get_domain_name(site)
-    create_project(domain_name)
-    full_path = domain_name + '/' + output
-    if os.path.exists(full_path):
-        os.remove(full_path)
-    current_dates = get_dates_from_csv(full_path)
+def extract_data(site, num_days):
+    creds = 'AB_tests/HelpPackages/client_secrets.json'
 
     webmasters_service = authorize_creds(creds)
 
     # Set up Dates
     end_date = datetime.date.today() - relativedelta.relativedelta(days=3)
     start_date = end_date - relativedelta.relativedelta(days=num_days)
-    delta = datetime.timedelta(days=1)  # This will let us loop one day at the time
     scDict = defaultdict(list)
 
-    if current_dates is not None and current_dates.str.contains(
-            datetime.datetime.strftime(start_date, '%Y-%m-%d')).any():
-        print('Existing Date: %s' % start_date)
-        start_date += delta
-    else:
+    maxRows = 25000  # Maximum 25K per call
+    numRows = 0  # Start at Row Zero
+    status = ''  # Initialize status of extraction
 
-        maxRows = 25000  # Maximum 25K per call
-        numRows = 0  # Start at Row Zero
-        status = ''  # Initialize status of extraction
+    while (status != 'Finished'):  # Test with i < 10 just to see how long the task will take to process.
+        request = {
+            'startDate': datetime.datetime.strftime(start_date, '%Y-%m-%d'),
+            'endDate': datetime.datetime.strftime(end_date, '%Y-%m-%d'),
+            'dimensions': ['date'],
+            'rowLimit': maxRows,
+            'startRow': numRows,
+        }
 
-        while (status != 'Finished'):  # Test with i < 10 just to see how long the task will take to process.
-            request = {
-                'startDate': datetime.datetime.strftime(start_date, '%Y-%m-%d'),
-                'endDate': datetime.datetime.strftime(end_date, '%Y-%m-%d'),
-                'dimensions': ['date'],
-                'rowLimit': maxRows,
-                'startRow': numRows,
-            }
+        response = execute_request(webmasters_service, site, request)
 
-            response = execute_request(webmasters_service, site, request)
+        try:
+            # Process the response
+            for row in response['rows']:
+                scDict['date'].append(row['keys'][0] or 0)
+                scDict['clicks'].append(row['clicks'] or 0)
+                scDict['ctr'].append(row['ctr'] or 0)
+                scDict['impressions'].append(row['impressions'] or 0)
+                scDict['position'].append(row['position'] or 0)
+            print('successful at %i' % numRows)
 
-            try:
-                # Process the response
-                for row in response['rows']:
-                    scDict['date'].append(row['keys'][0] or 0)
-                    scDict['clicks'].append(row['clicks'] or 0)
-                    scDict['ctr'].append(row['ctr'] or 0)
-                    scDict['impressions'].append(row['impressions'] or 0)
-                    scDict['position'].append(row['position'] or 0)
-                print('successful at %i' % numRows)
+        except:
+            print('error occurred at %i' % numRows)
 
-            except:
-                print('error occurred at %i' % numRows)
+        # Add response to dataframe
+        df = pd.DataFrame(data=scDict)
+        df['clicks'] = df['clicks'].astype('int')
+        df['ctr'] = df['ctr'] * 100
+        df['impressions'] = df['impressions'].astype('int')
+        df['position'] = df['position'].round(2)
 
-            # Add response to dataframe
-            df = pd.DataFrame(data=scDict)
-            df['clicks'] = df['clicks'].astype('int')
-            df['ctr'] = df['ctr'] * 100
-            df['impressions'] = df['impressions'].astype('int')
-            df['position'] = df['position'].round(2)
-
-            print('Numrows at the start of loop: %i' % numRows)
-            try:
-                numRows = numRows + len(response['rows'])
-            except:
-                status = 'Finished'
-            print('Numrows at the end of loop: %i' % numRows)
-            if numRows % maxRows != 0:
-                status = 'Finished'
-
-        print(df)
-        write_to_csv(df, full_path)
+        print('Numrows at the start of loop: %i' % numRows)
+        try:
+            numRows = numRows + len(response['rows'])
+        except:
+            status = 'Finished'
+        print('Numrows at the end of loop: %i' % numRows)
+        if numRows % maxRows != 0:
+            status = 'Finished'
     return df
-
-
-df = extract_data(site, creds, num_days, output)
-df.sort_values('clicks', ascending=False)
-plt = get_graphic_from_data(df)
 
 
 # Read CSV if it exists to find dates that have already been processed.
@@ -222,7 +203,3 @@ def get_graphic_from_csv(path):
         return plt
     else:
         return None
-
-
-# plt = get_graphic_from_csv('./hauswasserpumpe_info/gsc_data.csv')
-plt.savefig('graphic.jpg')

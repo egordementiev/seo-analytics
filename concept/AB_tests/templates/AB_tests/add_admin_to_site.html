@@ -1,0 +1,16 @@
+{% extends "AB_tests/base_ab_test.html" %}
+{% block content %}
+<div class="card" style="width: 100%">
+  <div class="card-body">
+    <h2 class="text-center">Add New Admin to Site</h2>
+    <div class="grafic d-flex justify-content-center">
+      <img src="https://ru-static.z-dn.net/files/d9b/4929deb610861bc06cf74b49ede99d80.png" style="width: 95%">
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      {{ form }}
+      <button type="Submit" class="btn btn-primary">Add Admin</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

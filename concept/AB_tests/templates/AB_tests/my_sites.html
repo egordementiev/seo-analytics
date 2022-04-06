@@ -1,0 +1,21 @@
+{% extends "AB_tests/base_ab_test.html" %}
+{% block content %}
+<div class="card" style="width: 100%">
+  <div class="card-body">
+    <h2 class="text-center">Your Site</h2>
+    {% for site in sites %}
+      <div>
+        <h5>{{ site.domain }}</h5>
+        <p>ID: {{ site.pk }}</p>
+        <p>Admins:</p>
+        <ul>
+          {% for user in site.users.all %}
+            <li>{{ user.email }}</li>
+          {% endfor %}
+        </ul>
+        <hr />
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

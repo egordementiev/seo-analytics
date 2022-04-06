@@ -23,46 +23,24 @@
           <ul class="navbar-nav mr-auto">
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="History" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                My Tests
+                A/B Tests
               </a>
-              <div class="dropdown-menu" aria-labelledby="My Tests">
-                <a class="dropdown-item" href="ab-test/my-tests/">A/B tests</a>
-                <a class="dropdown-item" href="#">Another tests</a>
-                <a class="dropdown-item" href="#">Another tests</a>
-                <a class="dropdown-item" href="#">Another tests</a>
+              <div class="dropdown-menu" aria-labelledby="A/B Tests">
+                <a class="dropdown-item" href="/ab-tests/create-test/">Create test</a>
+                <a class="dropdown-item" href="/ab-tests/delete-test/">Delete test</a>
+                <a class="dropdown-item" href="/ab-tests/my-tests/">My tests</a>
               </div>
             </li>
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="Create test" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Create test
+              <a class="nav-link dropdown-toggle" href="#" id="Sites" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Sites
               </a>
-              <div class="dropdown-menu" aria-labelledby="Create test">
-                <a class="dropdown-item" href="{% url 'create_ab_test' %}">A/B tests</a>
-                <a class="dropdown-item" href="#">Another tests</a>
-                <a class="dropdown-item" href="#">Another tests</a>
-                <a class="dropdown-item" href="#">Another tests</a>
-              </div>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="Finish test" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Finish test
-              </a>
-              <div class="dropdown-menu" aria-labelledby="Finish test">
-                <a class="dropdown-item" href="{% url 'finish_ab_test' %}">A/B tests</a>
-                <a class="dropdown-item" href="#">Another tests</a>
-                <a class="dropdown-item" href="#">Another tests</a>
-                <a class="dropdown-item" href="#">Another tests</a>
-              </div>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="History" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                History
-              </a>
-              <div class="dropdown-menu" aria-labelledby="History">
-                <a class="dropdown-item" href="ab-test/history/">A/B tests</a>
-                <a class="dropdown-item" href="#">Another tests</a>
-                <a class="dropdown-item" href="#">Another tests</a>
-                <a class="dropdown-item" href="#">Another tests</a>
+              <div class="dropdown-menu" aria-labelledby="Sites">
+                <a class="dropdown-item" href="/ab-tests/create-site/">Add site</a>
+                <a class="dropdown-item" href="/ab-tests/delete-site/">Delete site</a>
+                <a class="dropdown-item" href="/ab-tests/add-site-admin/">Add site admin</a>
+                <a class="dropdown-item" href="/ab-tests/delete-site-admin/">Delete site admin</a>
+                <a class="dropdown-item" href="/ab-tests/my-sites/">My sites</a>
               </div>
             </li>
           </ul>

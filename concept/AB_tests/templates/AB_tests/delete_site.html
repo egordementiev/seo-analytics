@@ -3,10 +3,13 @@
 <div class="card" style="width: 100%">
   <div class="card-body">
     <h2 class="text-center">Add New Site</h2>
+    {% if message %}
+      <p>{{ message }}</p>
+    {% endif %}
     <form method="post">
       {% csrf_token %}
       {{ form }}
-      <button type="Submit" class="btn btn-primary">Add Site</button>
+      <button type="Submit" class="btn btn-primary">Delete Site</button>
     </form>
   </div>
 </div>

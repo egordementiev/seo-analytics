@@ -135,7 +135,7 @@ def extract_data(site, num_days):
         request = {
             'startDate': datetime.datetime.strftime(start_date, '%Y-%m-%d'),
             'endDate': datetime.datetime.strftime(end_date, '%Y-%m-%d'),
-            'dimensions': ['date'],
+            'dimensions': ['date', 'page'],
             'rowLimit': maxRows,
             'startRow': numRows,
         }
@@ -170,6 +170,7 @@ def extract_data(site, num_days):
         print('Numrows at the end of loop: %i' % numRows)
         if numRows % maxRows != 0:
             status = 'Finished'
+    write_to_csv(df)
     return df
 
 
@@ -225,6 +226,7 @@ def get_data_from_date_to_date(site, start_date, end_date):
         print('Numrows at the end of loop: %i' % numRows)
         if numRows % maxRows != 0:
             status = 'Finished'
+    write_to_csv(df, 'test.csv')
     return df
 
 

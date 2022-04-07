@@ -2,14 +2,14 @@
 {% block content %}
 <div class="card" style="width: 100%">
   <div class="card-body">
-    <h2 class="text-center">Add New Site</h2>
+    <h2 class="text-center">Delete Site</h2>
     {% if message %}
       <p>{{ message }}</p>
     {% endif %}
     <form method="post">
       {% csrf_token %}
       {{ form }}
-      <button type="Submit" class="btn btn-primary">Delete Site</button>
+      <button type="Submit" class="btn btn-primary">Delete</button>
     </form>
   </div>
 </div>

@@ -146,12 +146,6 @@ def add_site(request):
 
 @login_required(login_url='/auth/login/')
 def delete_site(request):
-    # Get Domain Name to Delete a Project
-    def get_domain_name(start_url):
-        domain_name = '{uri.netloc}'.format(uri=urlparse(start_url))  # Get Domain Name To Name Project
-        domain_name = domain_name.replace('.', '_')
-        return domain_name
-
     user = request.user
 
     if request.method == "POST":
@@ -160,9 +154,6 @@ def delete_site(request):
         if form.is_valid:
             form.save(commit=False)
             site = form.cleaned_data.get('site')
-            domain = get_domain_name(site.domain)
-            if os.path.exists(f'{domain}'):
-                shutil.rmtree(f'{domain}')
             site.delete()
             message = 'site successfully deleted'
             return render(request, 'AB_tests/delete_site.html', {'form': form, 'message': message})

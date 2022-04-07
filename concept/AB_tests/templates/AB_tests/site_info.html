@@ -1,0 +1,40 @@
+{% extends "AB_tests/base_ab_test.html" %}
+{% block content %}
+<div class="card" style="width: 100%">
+  <div class="card-body">
+    {% if site %}
+      <h2 class="text-center">Site Info</h2>
+      <div>
+        <h3>{{ site.domain }}</h3>
+        <p>ID: {{ site.pk }}</p>
+        <p>Admins:</p>
+        <ul>
+          {% for user in site.users.all %}
+            <li>{{ user.email }}</li>
+          {% endfor %}
+        </ul>
+        {% if tests %}
+          <hr />
+          <h4>Current tests:</h4>
+          {% for test in tests %}
+            <div>
+              <h5>{{ test.title }}</h5>
+              <p>ID: {{ test.pk }}</p>
+              <p>Description: {{ test.description }}</p>
+              <p>Start Group A Date: {{ test.start_group_a_date }}</p>
+              <p>Start Group B Date: {{ test.start_group_b_date }}</p>
+              {% if test.result %}
+                <p>Result: {{ test.result }}%</p>
+              {% endif %}
+            </div>
+            <hr />
+          {% endfor %}
+        {% endif %}
+      </div>
+    {% else %}
+      <h2 class="text-center">Site didn't found</h2>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

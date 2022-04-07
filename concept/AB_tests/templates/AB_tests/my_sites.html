@@ -5,7 +5,7 @@
     <h2 class="text-center">Your Site</h2>
     {% for site in sites %}
       <div>
-        <h5>{{ site.domain }}</h5>
+        <a href="/ab-tests/site-info/{{ site.pk }}"><h5>{{ site.domain }}</h5></a>
         <p>ID: {{ site.pk }}</p>
         <p>Admins:</p>
         <ul>

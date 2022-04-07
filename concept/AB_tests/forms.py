@@ -61,11 +61,21 @@ class AddABTest(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         super(AddABTest, self).__init__(*args, **kwargs)
         self.fields['site'] = forms.ModelChoiceField(queryset=Site.objects.filter(users=user))
-        self.fields['start_group_a_date'] = forms.DateField()
-        self.fields['start_group_b_date'] = forms.DateField()
 
     class Meta:
         model = ABTest
         fields = '__all__'
         exclude = ['is_finished', 'result']
+
+
+class DeleteABTest(forms.ModelForm):
+
+    def __init__(self, user, *args, **kwargs):
+        super(DeleteABTest, self).__init__(*args, **kwargs)
+        print(f'ab_tests = {ABTest.objects.filter(site__in=Site.objects.filter(users=user))}')
+        self.fields['ABTest'] = forms.ModelChoiceField(queryset=ABTest.objects.filter(site__in=Site.objects.filter(users=user)))
+
+    class Meta:
+        model = ABTest
+        fields = []
 

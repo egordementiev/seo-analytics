@@ -173,6 +173,61 @@ def extract_data(site, num_days):
     return df
 
 
+def get_data_from_date_to_date(site, start_date, end_date):
+    creds = 'AB_tests/HelpPackages/client_secrets.json'
+
+    webmasters_service = authorize_creds(creds)
+
+    scDict = defaultdict(list)
+
+    maxRows = 25000  # Maximum 25K per call
+    numRows = 0  # Start at Row Zero
+    status = ''  # Initialize status of extraction
+
+    while (status != 'Finished'):  # Test with i < 10 just to see how long the task will take to process.
+        request = {
+            'startDate': datetime.datetime.strftime(start_date, '%Y-%m-%d'),
+            'endDate': datetime.datetime.strftime(end_date, '%Y-%m-%d'),
+            'dimensions': ['date'],
+            'rowLimit': maxRows,
+            'startRow': numRows,
+        }
+
+        response = execute_request(webmasters_service, site, request)
+
+        try:
+            # Process the response
+            for row in response['rows']:
+                scDict['date'].append(row['keys'][0] or 0)
+                scDict['clicks'].append(row['clicks'] or 0)
+                scDict['ctr'].append(row['ctr'] or 0)
+                scDict['impressions'].append(row['impressions'] or 0)
+                scDict['position'].append(row['position'] or 0)
+            print('successful at %i' % numRows)
+
+        except:
+            print('error occurred at %i' % numRows)
+
+        # Add response to dataframe
+        df = pd.DataFrame(data=scDict)
+        if df.empty:
+            return None
+        df['clicks'] = df['clicks'].astype('int')
+        df['ctr'] = df['ctr'] * 100
+        df['impressions'] = df['impressions'].astype('int')
+        df['position'] = df['position'].round(2)
+
+        print('Numrows at the start of loop: %i' % numRows)
+        try:
+            numRows = numRows + len(response['rows'])
+        except:
+            status = 'Finished'
+        print('Numrows at the end of loop: %i' % numRows)
+        if numRows % maxRows != 0:
+            status = 'Finished'
+    return df
+
+
 # Read CSV if it exists to find dates that have already been processed.
 def get_graphic_from_csv(path):
     if os.path.isfile(path):

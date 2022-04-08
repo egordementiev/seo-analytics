@@ -1,0 +1,34 @@
+{% extends "AB_tests/base_ab_test.html" %}
+{% block content %}
+<div class="card" style="width: 100%">
+  <div class="card-body">
+    {% if test %}
+      <h2 class="text-center">Test info</h2>
+      <h3>{{ test.title }}</h3>
+      <p>ID: {{ test.pk }}</p>
+      <p>Description: {{ test.description }}</p>
+      <p>Control Group Urls: {{ test.urls_control_group }}</p>
+      <p>Test Group Urls: {{ test.urls_test_group }}</p>
+      {% if test.result %}
+        <p>Result: {{ test.result }}%</p>
+      {% endif %}
+      {% if table %}
+        <hr />
+        <div>
+          <div>
+            <table class="table">
+              <tr>{% for element in table.head %}<th scope="col">{{ element }}</th>{% endfor %}</tr>
+              {% for row in table.body %}
+                <tr class="text-center">{% for element in row %}<td>{{ element }}</td>{% endfor %}</tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        <hr />
+      {% endif %}
+    {% else %}
+      <h2 class="text-center">Test didn't found</h2>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

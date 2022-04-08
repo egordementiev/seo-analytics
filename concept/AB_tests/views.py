@@ -1,3 +1,5 @@
+"""Wrote by Egor Dementiev, if you have problem, you can write me to email egor.dmnt@gmail.com"""
+
 import datetime
 import os
 import shutil
@@ -10,7 +12,8 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from .forms import *
 from django.contrib.auth.decorators import login_required
-from .HelpPackages.google_search_api import extract_data, get_graphic_from_data, get_clicks_from_date_to_date
+from .HelpPackages.google_search_api import extract_data, get_graphic_from_data,\
+    get_clicks_from_date_to_date, extract_data_with_page_from_day_to_day
 from .models import Site
 
 
@@ -94,6 +97,25 @@ def create_ab_test(request):
         if form.is_valid():
             form.save(commit=False)
             form.save()
+            # print(urls_control_group)
+            # print(f'------------------')
+            # print(urls_test_group)
+            # index = 0
+            # for url in urls_test_group:
+            #     urls_test_group[index] = url.strip()
+            #     index += 1
+            #
+            # index = 0
+            # for url in urls_control_group:
+            #     urls_control_group[index] = url.strip()
+            #     index += 1
+            #
+            # print(f'urls_test_group_after_strip == {urls_test_group}')
+            # print(f'urls_control_group_after_strip == {urls_control_group}')
+            # test.set_urls_control_group = urls_control_group
+            # test.set_urls_test_group = urls_test_group
+            # print(test.get_urls_control_group())
+            # print(test.get_urls_test_group())
             form = AddABTest(user)
             message = 'Test added successfully'
             return render(request, 'AB_tests/create_ab_test.html', {'form': form, 'message': message})
@@ -176,31 +198,50 @@ def site_info(request, site_id):
         tests = ABTest.objects.filter(site=sites[0]).filter(result=None)
         for test in tests:
             if test.start_date + timedelta(days=28) < datetime.date.today():
-                clicks_control_group_before = get_clicks_from_date_to_date(sites[0].domain, test.url_control_group,
-                                                                           test.start_date - timedelta(days=28),
-                                                                           test.start_date)
-                clicks_control_group_after = get_clicks_from_date_to_date(sites[0].domain, test.url_control_group,
-                                                                          test.start_date,
-                                                                          test.start_date + timedelta(days=28))
+                clicks_control_group_before = 0
+                for page in test.get_urls_control_group():
+                    print(f'1) {page}')
+                    clicks = get_clicks_from_date_to_date(sites[0].domain, page,
+                                                                               test.start_date - timedelta(days=28),
+                                                                               test.start_date)
+                    clicks_control_group_before += clicks if clicks else 0
 
-                clicks_test_group_before = get_clicks_from_date_to_date(sites[0].domain, test.url_test_group,
-                                                                           test.start_date - timedelta(days=28),
-                                                                           test.start_date)
-                clicks_test_group_after = get_clicks_from_date_to_date(sites[0].domain, test.url_test_group,
-                                                                          test.start_date,
-                                                                          test.start_date + timedelta(days=28))
+
+                clicks_control_group_after = 0
+                for page in test.get_urls_control_group():
+                    print(f'2) {page}')
+                    clicks = get_clicks_from_date_to_date(sites[0].domain, page,
+                                                          test.start_date,
+                                                          test.start_date + timedelta(days=28))
+                    clicks_control_group_after += clicks if clicks else 0
+
+                clicks_test_group_before = 0
+                for page in test.get_urls_test_group():
+                    print(f'3) {page}')
+                    clicks = get_clicks_from_date_to_date(sites[0].domain, page,
+                                                          test.start_date - timedelta(days=28),
+                                                          test.start_date)
+                    clicks_test_group_before += clicks if clicks else 0
+
+                clicks_test_group_after = 0
+                for page in test.get_urls_test_group():
+                    print(f'4) {page}')
+                    clicks = get_clicks_from_date_to_date(sites[0].domain, page,
+                                                          test.start_date,
+                                                          test.start_date + timedelta(days=28))
+                    clicks_test_group_after += clicks if clicks else 0
 
                 print(f'clicks_control_group_before = {clicks_control_group_before}')
                 print(f'clicks_control_group_after = {clicks_control_group_after}')
                 print(f'clicks_test_group_before = {clicks_test_group_before}')
                 print(f'clicks_test_group_after = {clicks_test_group_after}')
 
-                if clicks_control_group_before == 0:
-                    result_before = clicks_test_group_before / clicks_control_group_before
-                else:
+                if clicks_control_group_before == 0 or clicks_control_group_before is None:
                     result_before = 1
+                else:
+                    result_before = clicks_test_group_before / clicks_control_group_before
 
-                if clicks_control_group_after == 0:
+                if clicks_control_group_after == 0 or clicks_control_group_after is None:
                     result_after = 1
                 else:
                     result_after = clicks_test_group_after / clicks_control_group_after
@@ -214,3 +255,95 @@ def site_info(request, site_id):
         print(f'tests = {tests}')
         return render(request, 'AB_tests/site_info.html', {'site': sites[0], 'tests': tests})
     return render(request, 'AB_tests/site_info.html')
+
+
+# @login_required(login_url='/auth/login/')
+# def test_info(request, test_id):
+#     tests = ABTest.objects.filter(pk=test_id)
+#     if not tests or not request.user in tests[0].site.users.all():
+#         return render(request, 'AB_tests/test_info.html')
+#     if not tests[0].result:
+#         if tests[0].start_date + timedelta(days=28) < datetime.date.today():
+#             clicks_control_group_before = 0
+#             for page in tests[0].get_urls_control_group():
+#                 print(f'1) {page}')
+#                 clicks = get_clicks_from_date_to_date(tests[0].site.domain, page,
+#                                                                            tests[0].start_date - timedelta(days=28),
+#                                                                            tests[0].start_date)
+#                 clicks_control_group_before += clicks if clicks else 0
+#
+#             clicks_control_group_after = 0
+#             for page in tests[0].get_urls_control_group():
+#                 print(f'2) {page}')
+#                 clicks = get_clicks_from_date_to_date(tests[0].site.domain, page,
+#                                                       tests[0].start_date,
+#                                                       tests[0].start_date + timedelta(days=28))
+#                 clicks_control_group_after += clicks if clicks else 0
+#
+#             clicks_test_group_before = 0
+#             for page in tests[0].get_urls_test_group():
+#                 print(f'3) {page}')
+#                 clicks = get_clicks_from_date_to_date(tests[0].site.domain, page,
+#                                                       tests[0].start_date - timedelta(days=28),
+#                                                       tests[0].start_date)
+#                 clicks_test_group_before += clicks if clicks else 0
+#
+#             clicks_test_group_after = 0
+#             for page in tests[0].get_urls_test_group():
+#                 print(f'4) {page}')
+#                 clicks = get_clicks_from_date_to_date(tests[0].site.domain, page,
+#                                                       tests[0].start_date,
+#                                                       tests[0].start_date + timedelta(days=28))
+#                 clicks_test_group_after += clicks if clicks else 0
+#
+#             print(f'clicks_control_group_before = {clicks_control_group_before}')
+#             print(f'clicks_control_group_after = {clicks_control_group_after}')
+#             print(f'clicks_test_group_before = {clicks_test_group_before}')
+#             print(f'clicks_test_group_after = {clicks_test_group_after}')
+#
+#             if clicks_control_group_before == 0 or clicks_control_group_before is None:
+#                 result_before = 1
+#             else:
+#                 result_before = clicks_test_group_before / clicks_control_group_before
+#
+#             if clicks_control_group_after == 0 or clicks_control_group_after is None:
+#                 result_after = 1
+#             else:
+#                 result_after = clicks_test_group_after / clicks_control_group_after
+#
+#             result = (result_after - result_before) * 100
+#             print(f'result = {result}')
+#             tests[0].result = result
+#             tests[0].save()
+#
+#     table = {'head': ['Date', 'Control Group Clicks', 'Test Group Clicks', 'Ratio']}
+#
+#     for page in tests[0].get_urls_test_group():
+#         test_group_data = extract_data_with_page_from_day_to_day(tests[0].site.domain, page, tests[0].start_date,
+#                                                                  tests[0].start_date + timedelta(days=28))
+#
+#     for page in tests[0].get_urls_control_group():
+#         control_group_data = extract_data_with_page_from_day_to_day(tests[0].site.domain, page, tests[0].start_date,
+#                                                                     tests[0].start_date + timedelta(days=28))
+#
+#     if test_group_data.empty or control_group_data.empty:
+#         return render(request, 'AB_tests/test_info.html', {'test': tests[0]})
+#
+#     table['body'] = []
+#     index = 0
+#     for date in test_group_data['date']:
+#         if int(test_group_data['clicks'][index]) == 0:
+#             ratio = 0
+#         else:
+#             ratio = int(control_group_data['clicks'][index]) / int(test_group_data['clicks'][index])
+#
+#         row = [test_group_data['date'][index], control_group_data['clicks'][index], test_group_data['clicks'][index], ratio]
+#         print(row)
+#         table['body'].append(row)
+#         index += 1
+#
+#     print(table)
+#     return render(request, 'AB_tests/test_info.html', {'test': tests[0], 'table': table})
+
+
+

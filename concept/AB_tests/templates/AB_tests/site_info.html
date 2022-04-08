@@ -18,11 +18,11 @@
           <h4>Current tests:</h4>
           {% for test in tests %}
             <div>
-              <h5>{{ test.title }}</h5>
+              <a href="/ab-tests/test-info/{{ test.ID }}"><h5>{{ test.title }}</h5></a>
               <p>ID: {{ test.pk }}</p>
               <p>Description: {{ test.description }}</p>
-              <p>Start Group A Date: {{ test.start_group_a_date }}</p>
-              <p>Start Group B Date: {{ test.start_group_b_date }}</p>
+              <p>Control Group Urls: {{ test.urls_control_group }}</p>
+              <p>Test Group Urls: {{ test.urls_test_group }}</p>
               {% if test.result %}
                 <p>Result: {{ test.result }}%</p>
               {% endif %}

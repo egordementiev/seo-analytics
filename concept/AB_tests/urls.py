@@ -11,4 +11,5 @@ urlpatterns = [
     path('delete-site/', delete_site, name='delete_site'),
     path('my-sites/', my_sites, name='my_sites'),
     path('site-info/<int:site_id>', site_info, name='site-info'),
+    # path('test-info/<int:test_id>', test_info, name='test-info'),
 ]

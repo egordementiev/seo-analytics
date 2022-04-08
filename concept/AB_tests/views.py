@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from .forms import *
 from django.contrib.auth.decorators import login_required
-from .HelpPackages.google_search_api import extract_data, get_graphic_from_data, get_data_from_date_to_date
+from .HelpPackages.google_search_api import extract_data, get_graphic_from_data, get_clicks_from_date_to_date
 from .models import Site
 
 
@@ -175,48 +175,37 @@ def site_info(request, site_id):
     if sites and request.user in sites[0].users.all():
         tests = ABTest.objects.filter(site=sites[0]).filter(result=None)
         for test in tests:
-            if test.start_group_a_date + timedelta(days=28) < datetime.date.today() \
-                    and test.start_group_b_date + timedelta(days=28) < datetime.date.today():
-                data_group_a_before = get_data_from_date_to_date(sites[0].domain,
-                                                                 test.start_group_a_date - timedelta(days=28),
-                                                                 test.start_group_a_date)
-                data_group_a_after = get_data_from_date_to_date(sites[0].domain, test.start_group_a_date,
-                                                                test.start_group_a_date + timedelta(days=28))
-                data_group_b_before = get_data_from_date_to_date(sites[0].domain,
-                                                                 test.start_group_b_date - timedelta(days=28),
-                                                                 test.start_group_b_date)
-                data_group_b_after = get_data_from_date_to_date(sites[0].domain, test.start_group_b_date,
-                                                                test.start_group_b_date + timedelta(days=28))
+            if test.start_date + timedelta(days=28) < datetime.date.today():
+                clicks_control_group_before = get_clicks_from_date_to_date(sites[0].domain, test.url_control_group,
+                                                                           test.start_date - timedelta(days=28),
+                                                                           test.start_date)
+                clicks_control_group_after = get_clicks_from_date_to_date(sites[0].domain, test.url_control_group,
+                                                                          test.start_date,
+                                                                          test.start_date + timedelta(days=28))
 
-                print(f'data_group_a_before = {data_group_a_before}')
-                print(f'data_group_a_after = {data_group_a_after}')
-                print(f'data_group_b_before = {data_group_b_before}')
-                print(f'data_group_b_after = {data_group_b_after}')
-                if data_group_a_before is None or data_group_a_after is None \
-                        or data_group_b_before is None or data_group_b_after is None:
-                    test.delete()
-                    continue
+                clicks_test_group_before = get_clicks_from_date_to_date(sites[0].domain, test.url_test_group,
+                                                                           test.start_date - timedelta(days=28),
+                                                                           test.start_date)
+                clicks_test_group_after = get_clicks_from_date_to_date(sites[0].domain, test.url_test_group,
+                                                                          test.start_date,
+                                                                          test.start_date + timedelta(days=28))
 
-                data_group_a_before_int = 0
-                for clicks in data_group_a_before.get('clicks'):
-                    data_group_a_before_int += int(clicks)
+                print(f'clicks_control_group_before = {clicks_control_group_before}')
+                print(f'clicks_control_group_after = {clicks_control_group_after}')
+                print(f'clicks_test_group_before = {clicks_test_group_before}')
+                print(f'clicks_test_group_after = {clicks_test_group_after}')
 
-                data_group_a_after_int = 0
-                for clicks in data_group_a_after.get('clicks'):
-                    data_group_a_after_int += int(clicks)
+                if clicks_control_group_before == 0:
+                    result_before = clicks_test_group_before / clicks_control_group_before
+                else:
+                    result_before = 1
 
-                data_group_b_before_int = 0
-                for clicks in data_group_b_before.get('clicks'):
-                    data_group_b_before_int += int(clicks)
+                if clicks_control_group_after == 0:
+                    result_after = 1
+                else:
+                    result_after = clicks_test_group_after / clicks_control_group_after
 
-                data_group_b_after_int = 0
-                for clicks in data_group_b_after.get('clicks'):
-                    data_group_b_after_int += int(clicks)
-
-                before_result = data_group_b_before_int / data_group_a_before_int
-                after_result = data_group_b_after_int / data_group_a_after_int
-
-                result = (after_result - before_result) * 100
+                result = (result_after - result_before) * 100
                 print(f'result = {result}')
                 test.result = result
                 test.save()

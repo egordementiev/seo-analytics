@@ -174,7 +174,7 @@ def extract_data(site, num_days):
     return df
 
 
-def get_data_from_date_to_date(site, start_date, end_date):
+def get_clicks_from_date_to_date(site, page, start_date, end_date):
     creds = 'AB_tests/HelpPackages/client_secrets.json'
 
     webmasters_service = authorize_creds(creds)
@@ -189,7 +189,7 @@ def get_data_from_date_to_date(site, start_date, end_date):
         request = {
             'startDate': datetime.datetime.strftime(start_date, '%Y-%m-%d'),
             'endDate': datetime.datetime.strftime(end_date, '%Y-%m-%d'),
-            'dimensions': ['date'],
+            'dimensions': ["date", "page"],
             'rowLimit': maxRows,
             'startRow': numRows,
         }
@@ -200,6 +200,7 @@ def get_data_from_date_to_date(site, start_date, end_date):
             # Process the response
             for row in response['rows']:
                 scDict['date'].append(row['keys'][0] or 0)
+                scDict['page'].append(row['keys'][1] or 0)
                 scDict['clicks'].append(row['clicks'] or 0)
                 scDict['ctr'].append(row['ctr'] or 0)
                 scDict['impressions'].append(row['impressions'] or 0)
@@ -226,8 +227,14 @@ def get_data_from_date_to_date(site, start_date, end_date):
         print('Numrows at the end of loop: %i' % numRows)
         if numRows % maxRows != 0:
             status = 'Finished'
-    write_to_csv(df, 'test.csv')
-    return df
+
+    clicks = 0
+    index = 0
+    for page_from_df in df['page']:
+        if page_from_df == page:
+            clicks += df['clicks'][index]
+        index += 1
+    return clicks
 
 
 # Read CSV if it exists to find dates that have already been processed.
